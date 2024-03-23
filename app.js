@@ -1,11 +1,11 @@
-var createError = require("http-errors");
-var express = require("express");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+import createError from "http-errors";
+import express from "express";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
 
-var accountsRouter = require("./routes/accounts");
+import accountsRouter from "./routes/accounts.js";
 
-var app = express();
+let app = express();
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -26,4 +26,4 @@ app.use(function (err, req, res, next) {
 	res.send("server error: " + err.message);
 });
 
-module.exports = app;
+export default app;
