@@ -1,11 +1,17 @@
 import express from "express";
-import * as controller from "../controllers/accounts";
-const router = express.Router();
+import { AccountController } from "../controllers/accounts";
 
-router.post("/:accountId/deposit", controller.deposit);
-router.post("/:accountId/withdraw", controller.withdraw);
-router.post("/:accountId/transfer", controller.transfer);
-router.get("/:accountId", controller.checkAccount);
-router.post("/", controller.createAccount);
+export const setupAccountRoutes = () => {
+  const router = express.Router();
 
-export default router;
+  let controller = new AccountController();
+
+  router.post("/:accountId/deposit", controller.deposit.bind(controller));
+  router.post("/:accountId/withdraw", controller.withdraw.bind(controller));
+  router.post("/:accountId/transfer", controller.transfer.bind(controller));
+  router.get("/:accountId", controller.checkAccount.bind(controller));
+  router.post("/", controller.createAccount.bind(controller));
+  
+  return router;
+}
+

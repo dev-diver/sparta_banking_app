@@ -1,8 +1,9 @@
-import app from "./app.js"; // 확장자 생략 (TypeScript 컴파일러가 처리)
+import { createApp } from "./app"; // 확장자 생략 (TypeScript 컴파일러가 처리)
 import debugModule from "debug";
 const debug = debugModule("sparta-banking-app:server");
 import * as http from "http";
 
+let app = createApp();
 const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
