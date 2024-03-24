@@ -1,7 +1,7 @@
-import { Account } from "@interfaces/Entity/Account";
-import { Transaction } from "@interfaces/Entity/Transaction";
+import { TransactionEntity } from "@interfaces/Entity/Transaction";
+import { AccountRepositoryDTO } from "interfaces/RepositoryDTO/Account";
 
 export interface AccountServiceDTO {
-  account: Account;
-  transactions : Transaction[];
+  account: AccountRepositoryDTO
+  transactions : TransactionEntity[];
 }

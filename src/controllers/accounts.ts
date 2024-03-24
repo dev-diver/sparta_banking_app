@@ -7,48 +7,48 @@ import { InMemoryAccountRepository } from "../repositories/InMemoryAccount.js";
 import { AccountService } from "../services/accountService.js";
 import { IAccountService } from "@interfaces/Service/Account";
 import { IAccountRepository } from "@interfaces/Repository/Account";
+import { AccountRepositoryDTO } from "interfaces/RepositoryDTO/Account.js";
 
 const accountRepository : IAccountRepository= new InMemoryAccountRepository();
 const accountService : IAccountService = new AccountService(accountRepository);
 
-export const createAccount = (req: Request, res: Response, next: NextFunction) => {
+export const createAccount = async (req: Request, res: Response, next: NextFunction) => {
   const { accountName } = req.body;
-
-  next(createError(400, '잘못된 타입 요청'))
-  let response : Result<AccountServiceDTO>
-  res.json(response);
+  let result : Result<AccountServiceDTO>
+  let account : Result<AccountRepositoryDTO> = await accountService.createAccount(accountName);
+  console.log("account", account)
+  result = await accountService.checkAccount(account.data.id)
+  req.result = result
+  next()
 };
 
-export const checkAccount = (req: Request, res: Response, next: NextFunction) => {
+export const checkAccount = async (req: Request, res: Response, next: NextFunction) => {
   const { accountId } = req.params;
-
-  let data: Partial<AccountServiceDTO> = {};
-
-  res.json({ data });
+  let result : Result<AccountServiceDTO> = await accountService.checkAccount(accountId)
+  req.result = result
+  next()
 };
 
-export const deposit = (req: Request, res: Response, next: NextFunction) => {
+export const deposit = async (req: Request, res: Response, next: NextFunction) => {
   const { amount } = req.body;
   const { accountId } = req.params;
-
-  let response : Result<TransactionServiceDTO>
-  res.json(response);
+  let result : Result<TransactionServiceDTO> = await accountService.deposit(accountId, amount);
+  req.result = result
+  next()
 };
 
-export const withdraw = (req: Request, res: Response, next: NextFunction) => {
+export const withdraw = async (req: Request, res: Response, next: NextFunction) => {
   const { amount } = req.body;
   const { accountId } = req.params;
-
-  let data: Partial<TransactionServiceDTO> = {};
-
-  res.json({ data });
+  let result: Result<TransactionServiceDTO> = await accountService.withdraw(accountId, amount);
+  req.result = result
+  next()
 };
 
-export const transfer = (req: Request, res: Response, next: NextFunction) => {
+export const transfer = async (req: Request, res: Response, next: NextFunction) => {
   const { recipientAccountId, amount } = req.body;
   const { accountId } = req.params;
-
-  let data: Partial<TransactionServiceDTO> = {};
-
-  res.json({ data });
+  let result: Result<TransactionServiceDTO> = await accountService.transfer(accountId, recipientAccountId, amount)
+  req.result = result
+  next()
 };

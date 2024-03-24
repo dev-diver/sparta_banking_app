@@ -1,20 +1,43 @@
 import { IAccountRepository  } from "../interfaces/Repository/Account";
-import { Account } from "@interfaces/Entity/Account";
+import { AccountEntity } from "@interfaces/Entity/Account";
 import { ID } from "@customTypes/Id";
 import { createTransactionDTO } from "@interfaces/RepositoryDTO/CreateTransactionDTO";
-import { Transaction } from "@interfaces/Entity/Transaction";
-
+import { TransactionEntity } from "@interfaces/Entity/Transaction";
+import { TransactionType } from "../enums/TransactionType.js";
+import { AmountChangeType } from "../enums/AmountChange.js";
 export class InMemoryAccountRepository implements IAccountRepository {
   
-  private accounts: Account[] = [];
+  private accounts: AccountEntity[] = [];
   
-  createAccount(accountName: string): Promise<Account> {
-    return
+  async createAccount(accountName: string): Promise<AccountEntity> {
+    let data : AccountEntity = {
+      id: '1',
+      name: '스파르타',
+      balance: 0,
+      transactions:[]
+    }
+    return data
   };
-  findAccountById(accountId: ID): Promise<Account | null> {
-    return
+  async findAccountById(accountId: ID): Promise<AccountEntity | null> {
+    let data : AccountEntity = {
+      id: '1',
+      name: '스파르타',
+      balance: 0,
+      transactions:[]
+    }
+    return data
   };
-  createTransaction(transactionRequest: createTransactionDTO): Promise<Transaction> {
-    return
+  async createTransaction(transactionRequest: createTransactionDTO): Promise<TransactionEntity> {
+    let data : TransactionEntity = {
+      id : '1',
+      Ttype: TransactionType.Deposit,
+      time: new Date(),
+      accountId : '1',
+      counterpartyId : '2',
+      amountChangeType : AmountChangeType.Increase,
+      amount: 100,
+      balance: 100
+    }
+    return data
   };
 }

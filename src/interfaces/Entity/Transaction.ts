@@ -3,9 +3,9 @@ import { TransactionType }  from '@enums/TransactionType'
 import { ID } from '@customTypes/Id';
 import { Integer } from '@customTypes/Integer';
 
-export interface Transaction {
+export interface TransactionEntity {
   id : ID;
-  type: TransactionType;
+  Ttype: TransactionType;
   time: Date;
   accountId : ID;
   counterpartyId : ID;

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import accountsRouter from "./routes/accounts.js";
+import { Result } from "interfaces/RepositoryDTO/Result.js";
 
 const app = express();
 
@@ -12,9 +13,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use("/accounts", accountsRouter);
+declare module 'express-serve-static-core' {
+  interface Request {
+    result?: Result<any>;
+  }
+}
 
-// catch 404 and forward to error handler
+const resultHandler = (req: Request, res: Response, next: NextFunction) => {
+	let result = req.result;
+	if(result?.success){
+		res.json(result)
+	}else{
+		next(createError(400, result?.error || '알 수 없는 에러'))
+	}
+}
+
+app.use("/accounts", accountsRouter, resultHandler);
+
 app.use((req: Request, res: Response, next: NextFunction) => {
 	next(createError(404));
 });

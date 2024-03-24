@@ -3,7 +3,7 @@ import { Integer } from "@customTypes/Integer";
 import { TransactionType } from "@enums/TransactionType";
 
 export interface createTransactionDTO {
-  type: TransactionType;
+  Ttype: TransactionType;
   accountId: ID;
   counterpartyId: ID;
   amount: Integer;

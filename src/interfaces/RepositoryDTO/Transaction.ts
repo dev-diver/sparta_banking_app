@@ -5,7 +5,7 @@ import { Integer } from '@customTypes/Integer';
 
 export interface TransactionRepositoryDTO {
   id : ID;
-  type: TransactionType;
+  Ttype: TransactionType;
   time: Date;
   amountChangeType : AmountChangeType;
   amount: Integer;
