@@ -25,15 +25,18 @@ export class InMemoryAccountRepository implements IAccountRepository {
   };
   async findAccountById(accountId: ID): Promise<AccountEntity | null> {
     const account = this.accounts.find(account => account.id === accountId);
-    return account || null;
+    if(account){
+      return account
+    }else{
+      throw Error('계좌가 없습니다.')
+    }
   };
 
   async createTransaction(transactionRequest: createTransactionDTO): Promise<TransactionEntity> {
     const { accountId, amount } = transactionRequest;
     const account = await this.findAccountById(accountId);
     if (!account) throw new Error('계좌가 없습니다.');
-    const newTransactionId = (++this.lastTransactionId).toString()
-
+    
     let Ttype = transactionRequest.Ttype
     let changeType : AmountChangeType
     if(Ttype == TransactionType.Deposit || Ttype == TransactionType.Receive){
@@ -46,8 +49,13 @@ export class InMemoryAccountRepository implements IAccountRepository {
     if(changeType == AmountChangeType.Increase){
       account.balance += amount;
     }else if(changeType == AmountChangeType.Decrease){
+      if(account.balance < amount){
+        throw Error('계좌보다 많은 돈을 인출할 수 없습니다.')
+      }
       account.balance -= amount;
     }
+
+    const newTransactionId = (++this.lastTransactionId).toString()
 
     const newTransaction: TransactionEntity = {
       id: newTransactionId,
