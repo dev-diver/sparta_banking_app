@@ -3,7 +3,7 @@ import { Integer } from "@customTypes/Integer";
 import { Account } from "@interfaces/Entity/Account";
 import { AmountChangeType } from "@enums/AmountChange";
 
-export interface TransactionResponseDTO {
+export interface TransactionServiceDTO {
   type: TransactionType;
   time: Date;
   amountChangeType: AmountChangeType;

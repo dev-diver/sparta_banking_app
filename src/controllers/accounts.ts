@@ -1,31 +1,45 @@
 import createError from "http-errors";
 import { Request, Response, NextFunction } from 'express';
-import { TransactionResponseDTO } from '@interfaces/ResponseDTO/Transaction';
-import { AccountResponseDTO } from '@interfaces/ResponseDTO/Account';
-import { Account } from '@interfaces/Entity/Account';
-// import { isInteger } from "@customTypes/Integer.js";
-// import { isId } from "@customTypes/Id.js";
+import { TransactionServiceDTO } from '@interfaces/serviceDTO/Transaction';
+import { AccountServiceDTO } from '@interfaces/serviceDTO/Account';
+import { Result } from "@interfaces/RepositoryDTO/Result";
+import { InMemoryAccountRepository } from "../repositories/InMemoryAccount.js";
+import { AccountService } from "../services/accountService.js";
+import { IAccountService } from "@interfaces/Service/Account";
+import { IAccountRepository } from "@interfaces/Repository/Account";
 
-const accounts: Account[] = [];
+const accountRepository : IAccountRepository= new InMemoryAccountRepository();
+const accountService : IAccountService = new AccountService(accountRepository);
+
+export const createAccount = (req: Request, res: Response, next: NextFunction) => {
+  const { accountName } = req.body;
+
+  next(createError(400, '잘못된 타입 요청'))
+  let response : Result<AccountServiceDTO>
+  res.json(response);
+};
+
+export const checkAccount = (req: Request, res: Response, next: NextFunction) => {
+  const { accountId } = req.params;
+
+  let data: Partial<AccountServiceDTO> = {};
+
+  res.json({ data });
+};
 
 export const deposit = (req: Request, res: Response, next: NextFunction) => {
   const { amount } = req.body;
   const { accountId } = req.params;
 
-  // if (!isInteger(amount) || !isId(accountId)) {
-  //   next(createError(400, '잘못된 타입 요청'))
-  // }
-
-  let data: Partial<TransactionResponseDTO> = {};
-
-  res.json({ data });
+  let response : Result<TransactionServiceDTO>
+  res.json(response);
 };
 
 export const withdraw = (req: Request, res: Response, next: NextFunction) => {
   const { amount } = req.body;
   const { accountId } = req.params;
 
-  let data: Partial<TransactionResponseDTO> = {};
+  let data: Partial<TransactionServiceDTO> = {};
 
   res.json({ data });
 };
@@ -34,23 +48,7 @@ export const transfer = (req: Request, res: Response, next: NextFunction) => {
   const { recipientAccountId, amount } = req.body;
   const { accountId } = req.params;
 
-  let data: Partial<TransactionResponseDTO> = {};
-
-  res.json({ data });
-};
-
-export const checkAccount = (req: Request, res: Response, next: NextFunction) => {
-  const { accountId } = req.params;
-
-  let data: Partial<AccountResponseDTO> = {};
-
-  res.json({ data });
-};
-
-export const createAccount = (req: Request, res: Response, next: NextFunction) => {
-  const { accountName } = req.body;
-
-  let data: Partial<AccountResponseDTO> = {};
+  let data: Partial<TransactionServiceDTO> = {};
 
   res.json({ data });
 };
