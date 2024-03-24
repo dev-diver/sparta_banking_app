@@ -9,8 +9,13 @@ import { IAccountService } from "@interfaces/Service/Account";
 import { AccountServiceDTO } from "interfaces/serviceDTO/Account.js";
 import { TransactionType } from "../enums/TransactionType.js";
 import { TransactionEntity } from "../interfaces/Entity/Transaction.js";
+import { Lock } from "./Lock.js"
 export class AccountService implements IAccountService {
-  constructor(private accountRepository: IAccountRepository) {}
+
+  private lock : Lock
+  constructor(private accountRepository: IAccountRepository) {
+    this.lock = new Lock();
+  }
 
   transctionEntityToService(entity: TransactionEntity) : TransactionServiceDTO {
     let { Ttype, time, amountChangeType, amount, balance} = entity
@@ -57,7 +62,8 @@ export class AccountService implements IAccountService {
   }
   
   async deposit(accountId: ID, amount: Integer) : Promise<Result<TransactionServiceDTO>>{
-
+    
+    let release = await this.lock.acquire();
     try{
       let entity :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Deposit,
@@ -69,11 +75,15 @@ export class AccountService implements IAccountService {
       return { success: true, data }
     }catch(error){
       return { success: false, error: error.message}
+    }finally{
+      release()
     }
     
   }
 
   async withdraw(accountId: ID, amount: Integer) : Promise<Result<TransactionServiceDTO>>{
+    
+    let release = await this.lock.acquire();
     try{
       let entity :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Withdrawal,
@@ -85,10 +95,15 @@ export class AccountService implements IAccountService {
       return { success: true, data }
     }catch(error){
       return { success: false, error: error.message }
+    }finally{
+      release()
     }
+
   }
 
   async transfer(accountId: ID, recipientAccountId: ID, amount: Integer): Promise<Result<TransactionServiceDTO>>{
+    
+    let release = await this.lock.acquire();
     try{
       let sendTransaction :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Send,
@@ -106,8 +121,9 @@ export class AccountService implements IAccountService {
       return { success: true, data: data }
     }catch(error){
       return { success: false, error: error.message }
+    }finally{
+      release();
     }
-    
   }
 
 }

@@ -33,9 +33,16 @@ export class InMemoryAccountRepository implements IAccountRepository {
   };
 
   async createTransaction(transactionRequest: createTransactionDTO): Promise<TransactionEntity> {
-    const { accountId, amount } = transactionRequest;
+    const { accountId, counterpartyId, amount } = transactionRequest;
     const account = await this.findAccountById(accountId);
-    if (!account) throw new Error('계좌가 없습니다.');
+    let counterParty;
+    if(counterpartyId == "atm"){
+      counterParty = true
+    }else{
+      counterParty = await this.findAccountById(counterpartyId)
+    }
+    if (!account || !counterParty) throw new Error('계좌가 없습니다.');
+
     
     let Ttype = transactionRequest.Ttype
     let changeType : AmountChangeType
