@@ -1,15 +1,15 @@
 import { IAccountRepository } from "@interfaces/Repository/Account";
 import { AccountEntity } from "@interfaces/Entity/Account";
-import { ID , isId } from "../types/Id.js";
-import { Integer , isInteger } from "../types/Integer.js";
+import { ID , isId } from "../types/Id";
+import { Integer , isInteger } from "../types/Integer";
 import { Result } from "@interfaces/RepositoryDTO/Result";
 import { AccountRepositoryDTO } from "@interfaces/RepositoryDTO/Account";
 import { TransactionServiceDTO } from "@interfaces/serviceDTO/Transaction";
 import { IAccountService } from "@interfaces/Service/Account";
-import { AccountServiceDTO } from "interfaces/serviceDTO/Account.js";
-import { TransactionType } from "../enums/TransactionType.js";
-import { TransactionEntity } from "../interfaces/Entity/Transaction.js";
-import { Lock } from "./Lock.js"
+import { AccountServiceDTO } from "interfaces/serviceDTO/Account";
+import { TransactionType } from "../enums/TransactionType";
+import { TransactionEntity } from "../interfaces/Entity/Transaction";
+import { Lock } from "./Lock"
 export class AccountService implements IAccountService {
 
   private lock : Lock

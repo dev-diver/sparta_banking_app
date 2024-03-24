@@ -1,13 +1,12 @@
-import createError from "http-errors";
 import { Request, Response, NextFunction } from 'express';
 import { TransactionServiceDTO } from '@interfaces/serviceDTO/Transaction';
 import { AccountServiceDTO } from '@interfaces/serviceDTO/Account';
 import { Result } from "@interfaces/RepositoryDTO/Result";
-import { InMemoryAccountRepository } from "../repositories/InMemoryAccount.js";
-import { AccountService } from "../services/accountService.js";
+import { InMemoryAccountRepository } from "../repositories/InMemoryAccount";
+import { AccountService } from "../services/accountService";
 import { IAccountService } from "@interfaces/Service/Account";
 import { IAccountRepository } from "@interfaces/Repository/Account";
-import { AccountRepositoryDTO } from "interfaces/RepositoryDTO/Account.js";
+import { AccountRepositoryDTO } from "@interfaces/RepositoryDTO/Account";
 
 const accountRepository : IAccountRepository= new InMemoryAccountRepository();
 const accountService : IAccountService = new AccountService(accountRepository);

@@ -2,7 +2,8 @@
   "compilerOptions": {
     // "allowJs":true,
     "target": "es6", // 컴파일된 JavaScript의 ECMAScript 대상 버전.
-    "module": "es6", // Node.js 환경에서 사용할 모듈 시스템.
+    "module": "CommonJS", // Node.js 환경에서 사용할 모듈 시스템.
+    "preserveValueImports": false,
     "outDir": "dist", // 컴파일된 파일을 배치할 출력 디렉토리.
     "baseUrl": ".", // 비상대적 모듈 이름을 해석할 기준 디렉토리.
     "esModuleInterop": true, // ES6 모듈 사양과 CommonJS 모듈 사이의 호환성 향상.
@@ -15,7 +16,12 @@
       "@customTypes/*": ["./src/types/*", "./dist/types/*"],
       "@enums/*": ["./src/enums/*","./dist/types/*"],
       "@interfaces/*": ["./src/interfaces/*","./dist/types/*"],
+      "@repositories/*" : ["./src/repositories/*","./dist/repositories/*"],
+      "@services/*" : ["./src/services/*", "./dist/services/*"]
     }
+  },
+  "ts-node":{
+    "esm": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

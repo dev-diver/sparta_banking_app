@@ -3,8 +3,8 @@ import express, { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 
-import accountsRouter from "./routes/accounts.js";
-import { Result } from "interfaces/RepositoryDTO/Result.js";
+import accountsRouter from "./routes/accounts";
+import { Result } from "@interfaces/RepositoryDTO/Result";
 
 const app = express();
 

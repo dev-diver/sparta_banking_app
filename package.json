@@ -2,9 +2,8 @@
   "name": "sparta-banking-app",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "build": "tsc", 
+    "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
     "lint": "eslint ."
@@ -19,6 +18,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.3",
     "@babel/preset-env": "^7.24.3",
+    "@babel/preset-typescript": "^7.24.1",
     "@jest/types": "^29.6.3",
     "@types/cookie-parser": "^1.4.7",
     "@types/debug": "^4.1.12",

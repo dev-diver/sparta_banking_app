@@ -1,5 +1,5 @@
 import express from "express";
-import * as controller from "../controllers/accounts.js";
+import * as controller from "../controllers/accounts";
 const router = express.Router();
 
 router.post("/:accountId/deposit", controller.deposit);

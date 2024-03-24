@@ -3,8 +3,8 @@ import { AccountEntity } from "@interfaces/Entity/Account";
 import { ID } from "@customTypes/Id";
 import { createTransactionDTO } from "@interfaces/RepositoryDTO/CreateTransactionDTO";
 import { TransactionEntity } from "@interfaces/Entity/Transaction";
-import { TransactionType } from "../enums/TransactionType.js";
-import { AmountChangeType } from "../enums/AmountChange.js";
+import { TransactionType } from "../enums/TransactionType";
+import { AmountChangeType } from "../enums/AmountChange";
 export class InMemoryAccountRepository implements IAccountRepository {
   
   private accounts: AccountEntity[] = [];
