@@ -16,7 +16,6 @@ export const createAccount = async (req: Request, res: Response, next: NextFunct
   const { accountName } = req.body;
   let result : Result<AccountServiceDTO>
   let account : Result<AccountRepositoryDTO> = await accountService.createAccount(accountName);
-  console.log("account", account)
   result = await accountService.checkAccount(account.data.id)
   req.result = result
   next()
