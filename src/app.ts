@@ -1,11 +1,11 @@
-import createError from "http-errors";
-import express from "express";
+import createError , { HttpError } from "http-errors";
+import express, { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import accountsRouter from "./routes/accounts.js";
 
-let app = express();
+const app = express();
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -15,12 +15,12 @@ app.use(cookieParser());
 app.use("/accounts", accountsRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req: Request, res: Response, next: NextFunction) => {
 	next(createError(404));
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
 	// render the error page
 	res.status(err.status || 500);
 	res.send("server error: " + err.message);
