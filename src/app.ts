@@ -39,7 +39,10 @@ export const createApp = () =>{
 	app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
 		// render the error page
 		res.status(err.status || 500);
-		res.send("server error: " + err.message);
+		res.send({
+			success : false,
+			error : err.message}
+		);
 	});
 
 	return app;
