@@ -29,6 +29,12 @@ describe("계정 생성과 조회 set", () => {
 		util.verifyNewAccount(response2, "스파게티", "2");
 		util.verifyNewAccount(response3, "마가리타", "3");
 	});
+
+	it("없는 계좌 조회", async () => {
+		const response = await util.checkAccount("1", 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+	});
 });
 
 describe("입금과 출금 set", () => {
@@ -85,5 +91,124 @@ describe("입금과 출금 set", () => {
 		let data = accountResponse.data;
 		expect(data.account.balance).toBe(0);
 		expect(data.transactions.length).toBe(0);
+	});
+
+	it("없는 계좌에 입금", async () => {
+		let response = await util.deposit("2", 100, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+	});
+
+	it("없는 계좌에서 출금", async () => {
+		let response = await util.withdraw("2", 100, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+	});
+});
+
+describe("송금 set", () => {
+	beforeEach(async () => {
+		util.init();
+		await util.createNewAccount("스파르타");
+		await util.createNewAccount("마가리타");
+		await util.deposit("1", 200);
+		await util.deposit("2", 100);
+	});
+
+	it("단순 송금", async () => {
+		let response = await util.transfer("1", "2", 100);
+		let data = response.data;
+		expect(response.success).toBe(true);
+		util.checkTransaction(data, "SEND", 1, 100, 100);
+
+		let sendAccountResponse = await util.checkAccount("1");
+		data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "SEND", 1, 100, 100);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "RECEIVE", 0, 100, 200);
+	});
+
+	it("계좌보다 많은 돈 송금", async () => {
+		let response = await util.transfer("1", "2", 500, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌보다 많은 돈을 인출할 수 없습니다.");
+
+		let sendAccountResponse = await util.checkAccount("1");
+		let data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 200, 200);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 100, 100);
+	});
+
+	it("없는 계좌에서 송금", async () => {
+		let response = await util.transfer("3", "2", 100, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+
+		let sendAccountResponse = await util.checkAccount("1");
+		let data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 200, 200);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 100, 100);
+	});
+
+	it("없는 계좌로 송금", async () => {
+		let response = await util.transfer("1", "3", 100, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+
+		let sendAccountResponse = await util.checkAccount("1");
+		let data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 200, 200);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 100, 100);
+	});
+
+	it("없는 계좌에서 없는 계좌로 송금", async () => {
+		let response = await util.transfer("5", "3", 100, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+
+		let sendAccountResponse = await util.checkAccount("1");
+		let data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 200, 200);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 100, 100);
+	});
+
+	it("계좌보다 많은 돈 없는 계좌로 송금", async () => {
+		let response = await util.transfer("1", "3", 500, 400);
+		expect(response.success).toBe(false);
+		expect(response.error).toBe("계좌가 없습니다.");
+
+		let sendAccountResponse = await util.checkAccount("1");
+		let data = sendAccountResponse.data;
+		expect(data.account.balance).toBe(200);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 200, 200);
+
+		let receiveAccountResponse = await util.checkAccount("2");
+		data = receiveAccountResponse.data;
+		expect(data.account.balance).toBe(100);
+		util.checkTransaction(data.transactions[data.transactions.length - 1], "DEPOSIT", 0, 100, 100);
 	});
 });
