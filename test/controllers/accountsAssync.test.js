@@ -169,7 +169,6 @@ describe("입금과 출금 동시성 set", () => {
 		const initialDeposit = 100;
 		await util.deposit("1", initialDeposit);
 		const amounts = [100, -150, 100, -100, 100, -300];
-		const sum = amounts.reduce((p, c) => p + c);
 		const apiCalls = amounts.map((amount) => {
 			if (amount >= 0) {
 				return request(util.app).post("/accounts/1/deposit").send({ amount });
@@ -185,5 +184,88 @@ describe("입금과 출금 동시성 set", () => {
 
 		let accountResponse = await util.checkAccount("1");
 		expect(accountResponse.account.balance).toBeGreaterThanOrEqual(0);
+	});
+});
+
+function calculateTransfer(initialDeposits, transfers) {
+	const balances = {};
+	initialDeposits.forEach((v, i) => {
+		const id = (i + 1).toString();
+		balances[id] = v;
+	});
+	transfers.forEach((transaction) => {
+		const [senderId, receiverId, amount] = transaction;
+		balances[senderId] -= amount;
+		balances[receiverId] += amount;
+	});
+	return balances;
+}
+
+describe("송금 동시성 테스트", () => {
+	const initialDeposits = [500, 500, 500];
+	beforeEach(async () => {
+		util.init();
+		await util.createNewAccount("스파르타");
+		await util.createNewAccount("마가리타");
+		await util.createNewAccount("스파게티");
+		const apiCalls = initialDeposits.map((amount, i) => {
+			const id = (i + 1).toString();
+			return util.deposit(id, amount);
+		});
+		await Promise.all(apiCalls);
+	});
+
+	it("동시성 송금 성공", async () => {
+		const transfers = [
+			["1", "2", 100],
+			["2", "3", 100],
+			["2", "1", 200],
+			["3", "1", 100],
+		];
+
+		const apiCalls = transfers.map((transaction) => {
+			const [senderId, receiverId, amount] = transaction;
+			return request(util.app).post(`/accounts/${senderId}/transfer`).send({ recipientAccountId: receiverId, amount });
+		});
+
+		await Promise.all(apiCalls);
+		const balances = calculateTransfer(initialDeposits, transfers);
+
+		initialDeposits.forEach(async (_, i) => {
+			const id = (i + 1).toString();
+			const balance = balances[id];
+			let accountResponse = await util.checkAccount(id);
+			expect(accountResponse.account.balance).toBe(balance);
+			let transactions = accountResponse.transactions;
+			let lastTransaction = transactions[transactions.length - 1];
+			expect(lastTransaction.balance).toEqual(balance);
+		});
+	});
+
+	it("동시성 송금 실패", async () => {
+		const transfers = [
+			["1", "2", 100],
+			["2", "1", 600],
+			["2", "1", 200],
+			["3", "1", 100],
+		];
+
+		const apiCalls = transfers.map((transaction) => {
+			const [senderId, receiverId, amount] = transaction;
+			return request(util.app).post(`/accounts/${senderId}/transfer`).send({ recipientAccountId: receiverId, amount });
+		});
+
+		const responses = await Promise.all(apiCalls);
+		const hasFailure = responses.some((response) => response.status !== 200);
+		expect(hasFailure).toBe(true);
+
+		initialDeposits.forEach(async (_, i) => {
+			const id = (i + 1).toString();
+			const accountResponse = await util.checkAccount(id);
+			expect(accountResponse.account.balance).toBeGreaterThanOrEqual(0);
+			let transactions = accountResponse.transactions;
+			let lastTransaction = transactions[transactions.length - 1];
+			expect(lastTransaction.balance).toBeGreaterThanOrEqual(0);
+		});
 	});
 });

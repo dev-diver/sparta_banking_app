@@ -45,13 +45,13 @@ export class Util {
 		return this.responseWrap(response, expectSuccess);
 	}
 
-	transfer = async (id, recipientId, amount, expectSuccess = true) => {
+	async transfer(id, recipientId, amount, expectSuccess = true) {
 		const response = await request(this.app)
 			.post(`/accounts/${id}/transfer`)
 			.send({ recipientAccountId: recipientId, amount: amount });
 		this.responseStatusTest(response, expectSuccess);
 		return this.responseWrap(response, expectSuccess);
-	};
+	}
 
 	verifyNewAccount(response, expectedName, id) {
 		expect(response.account).toHaveProperty("balance", 0);
