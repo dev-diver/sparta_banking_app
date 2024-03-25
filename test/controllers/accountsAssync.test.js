@@ -79,3 +79,111 @@ describe("계정 생성과 조회 동시성 set", () => {
 		).toBe(true);
 	});
 });
+
+describe("입금과 출금 동시성 set", () => {
+	beforeEach(async () => {
+		util.init();
+		await util.createNewAccount("스파르타");
+	});
+
+	it("동시 입금", async () => {
+		const amounts = [100, 200, 300];
+		const sum = amounts.reduce((p, c) => p + c);
+		const apiCalls = amounts.map((amount) => {
+			return request(util.app).post("/accounts/1/deposit").send({ amount: amount });
+		});
+
+		await Promise.all(apiCalls);
+
+		let accountResponse = await util.checkAccount("1");
+		expect(accountResponse.account.balance).toBe(sum);
+		let transactions = accountResponse.transactions;
+		let lastTransaction = transactions[transactions.length - 1];
+		expect(lastTransaction.Ttype).toEqual("DEPOSIT");
+		expect(lastTransaction.amountChangeType).toEqual(0);
+		expect(lastTransaction.balance).toEqual(sum);
+	});
+
+	it("동시 출금", async () => {
+		const initialDeposit = 600;
+		await util.deposit("1", initialDeposit);
+		const amounts = [100, 200, 300];
+		const sum = amounts.reduce((p, c) => p + c);
+		const apiCalls = amounts.map((amount) => {
+			return request(util.app).post("/accounts/1/withdraw").send({ amount: amount });
+		});
+
+		await Promise.all(apiCalls);
+
+		let accountResponse = await util.checkAccount("1");
+		expect(accountResponse.account.balance).toBe(initialDeposit - sum);
+		let transactions = accountResponse.transactions;
+		let lastTransaction = transactions[transactions.length - 1];
+		expect(lastTransaction.Ttype).toEqual("WITHDRAWAL");
+		expect(lastTransaction.amountChangeType).toEqual(1);
+		expect(lastTransaction.balance).toEqual(initialDeposit - sum);
+	});
+
+	it("잔액보다 많은 경우가 있는 동시 출금 실패", async () => {
+		const initialDeposit = 100;
+		await util.deposit("1", initialDeposit);
+
+		const amounts = [50, 70, 110];
+		const apiCalls = amounts.map((amount) => {
+			return request(util.app).post("/accounts/1/withdraw").send({ amount });
+		});
+
+		const responses = await Promise.all(apiCalls);
+
+		const hasFailure = responses.some((response) => response.status !== 200);
+		expect(hasFailure).toBe(true);
+
+		let accountResponse = await util.checkAccount("1");
+		expect(accountResponse.account.balance).toBeLessThanOrEqual(initialDeposit);
+		expect(accountResponse.account.balance).toBeGreaterThanOrEqual(0);
+	});
+
+	it("동시 입금 출금 성공", async () => {
+		const initialDeposit = 100;
+		await util.deposit("1", initialDeposit);
+		const amounts = [100, -100, 100, -100, 100, -100];
+		const sum = amounts.reduce((p, c) => p + c);
+		const apiCalls = amounts.map((amount) => {
+			if (amount >= 0) {
+				return request(util.app).post("/accounts/1/deposit").send({ amount });
+			} else {
+				return request(util.app).post("/accounts/1/withdraw").send({ amount: -amount });
+			}
+		});
+
+		await Promise.all(apiCalls);
+
+		let accountResponse = await util.checkAccount("1");
+		expect(accountResponse.account.balance).toBe(initialDeposit + sum);
+		let transactions = accountResponse.transactions;
+		let lastTransaction = transactions[transactions.length - 1];
+		expect(lastTransaction.balance).toEqual(initialDeposit + sum);
+	});
+
+	it("입금과 잔액보다 많은 출금이 있는 동시성 실패", async () => {
+		const initialDeposit = 100;
+		await util.deposit("1", initialDeposit);
+		const amounts = [100, -150, 100, -100, 100, -300];
+		const sum = amounts.reduce((p, c) => p + c);
+		const apiCalls = amounts.map((amount) => {
+			if (amount >= 0) {
+				return request(util.app).post("/accounts/1/deposit").send({ amount });
+			} else {
+				return request(util.app).post("/accounts/1/withdraw").send({ amount: -amount });
+			}
+		});
+
+		const responses = await Promise.all(apiCalls);
+
+		const hasFailure = responses.some((response) => response.status !== 200);
+		expect(hasFailure).toBe(true);
+
+		let accountResponse = await util.checkAccount("1");
+		expect(accountResponse.account.balance).toBeGreaterThanOrEqual(0);
+	});
+});
