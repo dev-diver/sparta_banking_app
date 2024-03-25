@@ -1,7 +1,7 @@
 import { IAccountRepository } from "@interfaces/Repository/Account";
 import { AccountEntity } from "@interfaces/Entity/Account";
 import { ID , isId } from "../types/Id";
-import { Integer , isInteger } from "../types/Integer";
+import { Integer , isInteger, isAmount } from "../types/Integer";
 import { Result } from "@interfaces/RepositoryDTO/Result";
 import { AccountRepositoryDTO } from "@interfaces/RepositoryDTO/Account";
 import { TransactionServiceDTO } from "@interfaces/serviceDTO/Transaction";
@@ -40,7 +40,7 @@ export class AccountService implements IAccountService {
   }
 
   async checkAccount(accountId: ID): Promise<Result<AccountServiceDTO | undefined>>{
-    
+
     try{
       if (!isId(accountId)) {
         throw new Error('잘못된 아이디 요청')
@@ -62,9 +62,12 @@ export class AccountService implements IAccountService {
   }
   
   async deposit(accountId: ID, amount: Integer) : Promise<Result<TransactionServiceDTO>>{
-    
+
     let release = await this.lock.acquire();
     try{
+      if (!isAmount(amount)) {
+        throw new Error('금액은 0보다 커야합니다.')
+      }
       let entity :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Deposit,
         accountId: accountId,
@@ -82,9 +85,12 @@ export class AccountService implements IAccountService {
   }
 
   async withdraw(accountId: ID, amount: Integer) : Promise<Result<TransactionServiceDTO>>{
-    
+
     let release = await this.lock.acquire();
     try{
+      if (!isAmount(amount)) {
+        throw new Error('금액은 0보다 커야합니다.')
+      }
       let entity :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Withdrawal,
         accountId: accountId,
@@ -102,9 +108,12 @@ export class AccountService implements IAccountService {
   }
 
   async transfer(accountId: ID, recipientAccountId: ID, amount: Integer): Promise<Result<TransactionServiceDTO>>{
-    
+
     let release = await this.lock.acquire();
     try{
+      if (!isAmount(amount)) {
+        throw new Error('금액은 0보다 커야합니다.')
+      }
       let sendTransaction :TransactionEntity = await this.accountRepository.createTransaction({
         Ttype: TransactionType.Send,
         accountId: accountId,
